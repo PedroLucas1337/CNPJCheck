@@ -1,0 +1,94 @@
+Passos para Conectar a uma API com C#
+Criar um Novo Projeto:
+
+Abra o Visual Studio e crie um novo projeto de Console Application ou Windows Forms Application, dependendo de suas necessidades.
+Adicionar Referência ao System.Net.Http:
+
+Em projetos .NET Core ou .NET 5/6/7+, o HttpClient já está incluído. Se estiver usando uma versão mais antiga do .NET Framework, você pode precisar adicionar a referência ao pacote System.Net.Http via NuGet.
+Usar o HttpClient para Fazer Requisições:
+
+O HttpClient é a classe usada para enviar requisições HTTP e receber respostas. Aqui está um exemplo básico para fazer uma requisição GET a uma API e processar a resposta.
+Exemplo de Código
+1. Código para Console Application
+Se você estiver criando uma aplicação de console, o código seria algo assim:
+
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+
+class Program
+{
+    static async Task Main(string[] args)
+    {
+        // URL da API que você deseja acessar
+        string url = "https://api.exemplo.com/dados";
+
+        // Cria uma instância do HttpClient
+        using HttpClient client = new HttpClient();
+
+        try
+        {
+            // Faz a requisição GET
+            HttpResponseMessage response = await client.GetAsync(url);
+
+            // Verifica se a requisição foi bem-sucedida
+            response.EnsureSuccessStatusCode();
+
+            // Lê o conteúdo da resposta como string
+            string responseBody = await response.Content.ReadAsStringAsync();
+
+            // Exibe o conteúdo da resposta
+            Console.WriteLine(responseBody);
+        }
+        catch (HttpRequestException e)
+        {
+            // Exibe erros de requisição
+            Console.WriteLine($"Erro na requisição: {e.Message}");
+        }
+    }
+}
+
+
+// Windows forms applications
+
+using System;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+public partial class Form1 : Form
+{
+    public Form1()
+    {
+        InitializeComponent();
+    }
+
+    private async void btnBuscar_Click(object sender, EventArgs e)
+    {
+        // URL da API que você deseja acessar
+        string url = "https://api.exemplo.com/dados";
+
+        // Cria uma instância do HttpClient
+        using HttpClient client = new HttpClient();
+
+        try
+        {
+            // Faz a requisição GET
+            HttpResponseMessage response = await client.GetAsync(url);
+
+            // Verifica se a requisição foi bem-sucedida
+            response.EnsureSuccessStatusCode();
+
+            // Lê o conteúdo da resposta como string
+            string responseBody = await response.Content.ReadAsStringAsync();
+
+            // Exibe o conteúdo da resposta em um TextBox
+            txtResultado.Text = responseBody;
+        }
+        catch (HttpRequestException ex)
+        {
+            // Exibe erros de requisição
+            MessageBox.Show($"Erro na requisição: {ex.Message}");
+        }
+    }
+}

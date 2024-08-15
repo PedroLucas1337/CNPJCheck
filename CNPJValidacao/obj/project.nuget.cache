@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "4y282rIeeqqYef2v5fRl9Cv2dzePtDsH+S5DHeOhb/p6Yw7Dw+C7tdY2/rjdjEWldykkLy+/opCyKnYfIymTDw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\pedrolucas\\source\\repos\\CNPJValidacao\\CNPJValidacao\\CNPJValidacao.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\pedrolucas\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}

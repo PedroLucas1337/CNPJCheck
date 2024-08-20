@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using YourNamespace;
 
 namespace CNPJValidacao
 {
@@ -15,19 +14,41 @@ namespace CNPJValidacao
         {
             if (string.IsNullOrWhiteSpace(cnpj))
             {
-                throw new ArgumentException("Cnpj vazio", nameof(cnpj));
+                throw new ArgumentException("CNPJ não pode ser vazio", nameof(cnpj));
             }
 
-            string apiUrl = $"https://www.receitaws.com.br/v1/cnpj/{cnpj}";
+            // Remover caracteres especiais do CNPJ (., /, -)
+            string cnpjFormatado = cnpj.Replace(".", "").Replace("/", "").Replace("-", "");
 
-            HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
-            response.EnsureSuccessStatusCode();
+            // Garantir que o CNPJ tenha exatamente 14 dígitos
+            if (cnpjFormatado.Length != 14)
+            {
+                throw new ArgumentException("CNPJ deve conter 14 dígitos", nameof(cnpj));
+            }
 
-            string responseBody = await response.Content.ReadAsStringAsync();
+            string apiUrl = $"https://publica.cnpj.ws/cnpj/{cnpjFormatado}";
 
-            CNPJModels cnpjModels = JsonConvert.DeserializeObject<CNPJModels>(responseBody);
+            try
+            {
+                HttpResponseMessage response = await httpClient.GetAsync(apiUrl);
+                response.EnsureSuccessStatusCode();
 
-            return cnpjModels;
+                string responseBody = await response.Content.ReadAsStringAsync();
+
+                CNPJModels cnpjModels = JsonConvert.DeserializeObject<CNPJModels>(responseBody);
+
+                return cnpjModels;
+            }
+            catch (HttpRequestException e)
+            {
+                // Log the exception or handle it as needed
+                throw new Exception("Erro ao consultar a API do CNPJ", e);
+            }
+            catch (JsonException e)
+            {
+                // Log the exception or handle it as needed
+                throw new Exception("Erro ao processar a resposta da API", e);
+            }
         }
     }
 }

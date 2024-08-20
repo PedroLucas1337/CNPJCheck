@@ -1,43 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using YourNamespace;
 
 namespace CNPJValidacao
 {
     internal class CNPJAll
     {
-        public void exibirInformacoes (CNPJModels cnpjModels)
+        public void ExibirInformacoes(CNPJModels cnpjModels)
         {
             if (cnpjModels == null)
             {
                 Console.WriteLine("CNPJ Nulo");
                 return;
             }
-            Console.WriteLine("Nome: " + (cnpjModels.Nome ?? "Nome não disponível"));
-            Console.WriteLine("Situação: " + (cnpjModels.Situacao ?? "Situação não disponível"));
-            Console.WriteLine("Tipo: " + (cnpjModels.Tipo ?? "Tipo não disponível"));
-            Console.WriteLine("Porte: " + (cnpjModels.Porte ?? "Porte não disponível"));
-            Console.WriteLine("Natureza Jurídica: " + (cnpjModels.NaturezaJuridica ?? "Natureza Jurídica não disponível"));
 
-            if (cnpjModels.AtividadePrincipal != null && cnpjModels.AtividadePrincipal.Count > 0)
+            Console.WriteLine("Razão Social: " + (cnpjModels.RazaoSocial ?? "Razão Social não disponível"));
+            Console.WriteLine("Situação Cadastral: " + (cnpjModels.Estabelecimento?.SituacaoCadastral ?? "Situação Cadastral não disponível"));
+            Console.WriteLine("Tipo: " + (cnpjModels.Estabelecimento?.Tipo ?? "Tipo não disponível"));
+            Console.WriteLine("Porte: " + (cnpjModels.Porte?.Descricao ?? "Porte não disponível"));
+            Console.WriteLine("Natureza Jurídica: " + (cnpjModels.NaturezaJuridica?.Descricao ?? "Natureza Jurídica não disponível"));
+
+            if (cnpjModels.Estabelecimento?.AtividadePrincipal != null)
             {
                 Console.WriteLine("Atividade Principal: ");
-                foreach (var atividade in cnpjModels.AtividadePrincipal)
-                {
-                    Console.WriteLine($"- Código: {atividade.Code}, Descrição: {atividade.Text}");
-                }
+                var atividade = cnpjModels.Estabelecimento.AtividadePrincipal;
+                Console.WriteLine($"- Código: {atividade.Id}, Descrição: {atividade.Descricao}");
             }
             else
             {
-                Console.WriteLine("Atiivdade Principal não disponível");
+                Console.WriteLine("Atividade Principal não disponível");
             }
 
-            if (cnpjModels.Qsa != null && cnpjModels.Qsa.Count > 0)
+            if (cnpjModels.Socios != null && cnpjModels.Socios.Count > 0)
             {
                 Console.WriteLine("Quadro Societário:");
-                foreach (var qsa in cnpjModels.Qsa)
+                foreach (var qsa in cnpjModels.Socios)
                 {
                     Console.WriteLine($"- Nome: {qsa.Nome}, Qualificação: {qsa.Qual}");
                 }

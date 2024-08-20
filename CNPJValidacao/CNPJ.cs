@@ -1,10 +1,9 @@
-using CNPJValidacao;
-using Newtonsoft.Json;
 using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Resources.ResXFileRef;
+using Newtonsoft.Json;
+using System.Net.Http;
+using YourNamespace;
 
 namespace CNPJValidacao
 {
@@ -16,16 +15,13 @@ namespace CNPJValidacao
         public Form1()
         {
             InitializeComponent();
-
-            totvsApiClient = new TotvsApiClient("https://api.totvs.com.br");
+            totvsApiClient = new TotvsApiClient("https://api.totvs.com.br", new CNPJService(), new YourNamespace.CnpjToTotvsMapper());
         }
 
         private async void button1_Click(object sender, EventArgs e)
         {
-            // Obtém o CNPJ inserido no TextBox
             string cnpj = textBox1.Text.Trim();
 
-            // Verifica se o CNPJ é válido (não está vazio)
             if (string.IsNullOrWhiteSpace(cnpj))
             {
                 MessageBox.Show("Por favor, insira um CNPJ.");
@@ -34,21 +30,42 @@ namespace CNPJValidacao
 
             try
             {
-
                 CNPJService cnpjService = new CNPJService();
-                CNPJAll cnpjAll = new CNPJAll();
                 CNPJModels cnpjModels = await cnpjService.ObterInfoCNPJAsync(cnpj);
+
                 await totvsApiClient.FetchAndSendDataAsync(cnpj);
 
                 if (cnpjModels != null)
                 {
+                    label1.Text = "CNPJ";
+                    label2.Text = $"Razão Social: {cnpjModels.RazaoSocial ?? "Razão Social Indisponível"}\n" +
+                                  $"Capital Social: {cnpjModels.CapitalSocial ?? "Capital Social Indisponível"}\n" +
+                                  $"Responsável Federativo: {cnpjModels.ResponsavelFederativo ?? "Responsável Federativo Indisponível"}\n" +
+                                  $"Porte: {cnpjModels.Porte?.Descricao ?? "Porte Indisponível"}\n" +
+                                  $"Natureza Jurídica: {cnpjModels.NaturezaJuridica?.Descricao ?? "Natureza Jurídica Indisponível"}\n" +
+                                  $"Atualizado Em: {cnpjModels.AtualizadoEm.ToString("dd/MM/yyyy")}";
 
-                    cnpjAll.exibirInformacoes(cnpjModels);
-                    label2.Text = $"Nome: {cnpjModels.Nome ?? "Nome Indisponivel"}\n" +
-                                  $"Situação: {cnpjModels.Situacao ?? "Situação Indisponivel"}\n" +
-                                  $"Tipo: {cnpjModels.Tipo ?? "Tipo Indisponivel"}";
+                    if (cnpjModels.Estabelecimento != null)
+                    {
+                        label2.Text += $"\nNome Fantasia: {cnpjModels.Estabelecimento.NomeFantasia ?? "Nome Fantasia Indisponível"}\n" +
+                                      $"Situação Cadastral: {cnpjModels.Estabelecimento.SituacaoCadastral ?? "Situação Cadastral Indisponível"}\n" +
+                                      $"Data Início Atividade: {cnpjModels.Estabelecimento.DataInicioAtividade ?? "Data Início Atividade Indisponível"}\n" +
+                                      $"Inscrição Estadual: {string.Join(", ", cnpjModels.Estabelecimento.InscricoesEstaduais?.Select(i => i.NumeroInscricao) ?? new[] { "Inscrição Estadual Indisponível" })}";
+                    }
+
+                    if (cnpjModels.Socios != null && cnpjModels.Socios.Count > 0)
+                    {
+                        label2.Text += "\nSócios:";
+                        foreach (var socio in cnpjModels.Socios)
+                        {
+                            label2.Text += $"\n- Nome: {socio.Nome}, Qualificação: {socio.Qual}, Nome Representante Legal: {socio.NomeRepLegal}, Qualificação Representante Legal: {socio.QualRepLegal}";
+                        }
+                    }
+                    else
+                    {
+                        label2.Text += "\nSócios não disponíveis";
+                    }
                 }
-
                 else
                 {
                     label2.Text = "Resposta da API não contém dados válidos.";
@@ -66,21 +83,8 @@ namespace CNPJValidacao
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // Inicializa o texto da label1
             label1.Text = "CNPJ";
-            // Inicializa o texto da label2
             label2.Text = "Validação";
         }
     }
 }
-
-//Explicação:
-//Consulta CNPJ: Ao clicar no botão, consultamos a API da Receita Federal.
-//Mapeamento: Convertendo os dados recebidos para ModelClass.
-//Envio para Totvs RM: Enviamos o ModelClass mapeado para a API do Totvs RM e informamos o usuário sobre o sucesso ou falha da operação.
-
-
-//Resumo
-//Mapper: Converte dados da Receita Federal para o formato esperado pela API do Totvs RM.
-//API Client: Envia os dados para a API do Totvs RM.
-//Formulário: Coordena a consulta, mapeamento e envio dos dados, e fornece feedback ao usuário.
